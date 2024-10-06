@@ -416,6 +416,7 @@ static void Update()
 	static float titleTime;
 	if (!titleDone)
 	{
+		if (!titleTime) imcMusic.SetSongVolume(35);
 		titleTime += ZLELAPSED;
 		float a = 1 - ZL_Math::Clamp01(titleTime * .8f);
 		ZL_Display::FillRect(0, 0, ZLWIDTH, ZLHEIGHT, ZLRGBA(0, .1, 0, .7f+a*.3f));
@@ -449,11 +450,16 @@ static void Update()
 		DrawTextBordered(ZL_Vector(18, 12), "(C) 2024 by Bernhard Schelling", 1, ZLRGBA(1,.9,.3,.7), ZLBLACK, 2, ZL_Origin::BottomLeft);
 		ZL_Display::FillRect(0, 0, ZLWIDTH, ZLHEIGHT, ZLLUMA(0, a));
 		if (ZL_Input::Down(ZLK_ESCAPE))
+		{
+			imcMusic.SetSongVolume(0); // for web
 			ZL_Application::Quit(0);
+		}
 		else if (a <= .5f && (ZL_Input::KeyDownCount() || ZL_Input::Clicked()))
 		{
 			InitStage(1);
 			titleDone = true;
+			paused = false;
+			imcMusic.SetSongVolume(28);
 		}
 		return;
 	}
@@ -482,6 +488,7 @@ static void Update()
 	}
 	const bool gameover = !haveTinies || !player.Health;
 	const bool noupdate = (paused || gameover);
+	if (gameover && paused) { paused = false; titleTime = 0; titleDone = false; }
 
 	ZL_Vector pursueUIPos;
 	if (!noupdate)
